@@ -1,0 +1,20 @@
+{
+	"name": "veams-component-accordion",
+	"version": "0.0.1",
+	"ignore": [
+		".bowerrc",
+		".gitignore",
+		"bower.json",
+		"README.md"
+	],
+	"authors": [
+		{
+			"name": "Sebastian Fitzner",
+			"email": "sebastian@veams.org"
+		}
+	],
+	"repository": {
+	  "type": "git",
+	  "url": "git://github.com/Veams/veams-component-accordion.git"
+	}
+}

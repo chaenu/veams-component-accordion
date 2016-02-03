@@ -1,0 +1,10 @@
+{{!
+---
+component: accordion
+---
+}}
+
+<div class="c-accordion{{#if options.context}}--{{options.context}}{{else}}--default{{/if}}{{#if options.classes}} {{options.classes}}{{/if}}"
+     data-css="c-accordion" data-js-context="{{#if options.elementContext}}{{options.elementContext}}{{/if}}">
+	{{{yield}}}
+</div>
