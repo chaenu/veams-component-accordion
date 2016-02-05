@@ -1,13 +1,13 @@
 # Accordion
 
-This blueprint is based on the blueprint of Veams-Components.
+This component is based on the blueprint of Veams-Components.
 
 ## Usage
 
 ### Include: Page
 
 ``` hbs
-{{! @INSERT :: START @id: accordion, @tag: component
+{{! @INSERT :: START @id: accordion, @tag: component-partial }}
 {{! WrapWith START: Accordion }}
 	{{#wrapWith "c-accordion"}}
 	{{! WrapWith START: Item }}
@@ -28,7 +28,7 @@ This blueprint is based on the blueprint of Veams-Components.
 ### Include: SCSS
 
 ``` scss
-// @INSERT :: START @id: scss-import, @tag: component
+// @INSERT :: START @id: scss-import
 @import "components/_c-accordion";
 // @INSERT :: END
 ```
@@ -37,14 +37,14 @@ This blueprint is based on the blueprint of Veams-Components.
 
 #### Import
 ``` js
-// @INSERT :: START @id: js-import, @tag: component
+// @INSERT :: START @id: js-import
 import Accordion from './modules/accordion/accordion';
 // @INSERT :: END
 ```
 
 #### Initializing in Veams V2
 ``` js
-// @INSERT :: START @id: js-init-v2, @tag: component
+// @INSERT :: START @id: js-init-v2
 /**
  * Init Accordion
  */
@@ -58,7 +58,7 @@ Helpers.loadModule({
 
 #### Initializing in Veams V3
 ``` js
-// @INSERT :: START @id: js-init-v3, @tag: component
+// @INSERT :: START @id: js-init-v3
 /**
  * Init Accordion
  */
