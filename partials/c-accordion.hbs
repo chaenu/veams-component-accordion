@@ -5,6 +5,8 @@ component: accordion
 }}
 
 <div class="c-accordion{{#if options.context}}--{{options.context}}{{else}}--default{{/if}}{{#if options.classes}} {{options.classes}}{{/if}}"
-     data-css="c-accordion" data-js-context="{{#if options.elementContext}}{{options.elementContext}}{{/if}}">
+     data-css="c-accordion" data-js-module="accordion"{{#if options.jsOptions}} data-js-options='{
+     {{#each options.jsOptions}}"{{jsKey}}": {{#unless jsObject}}"{{/unless}}{{{jsValue}}}{{#unless jsObject}}"{{/unless}}{{#if @last}}{{else}}, {{/if}}{{/each}}
+     }'{{/if}}>
 	{{{yield}}}
 </div>

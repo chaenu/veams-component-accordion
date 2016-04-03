@@ -1,0 +1,100 @@
+/* ===================================================
+Accordion
+=================================================== */
+
+[data-css="c-accordion"] {
+	position: relative;
+
+	/*
+	Wrapper Item
+	----------------------- */
+	.accordion__item {
+	}
+
+	/*
+	Header/ Toggle Button
+	----------------------- */
+	.accordion__header {
+	}
+	.accordion__btn {
+	}
+	.accordion__icon {
+	}
+
+	/*
+	Content/ Toggle Content
+	----------------------- */
+	.accordion__content {
+	}
+	.accordion__content-inner {
+	}
+
+	/*
+	Modifiers
+	----------------------- */
+	.is-closed {
+		height: 0;
+		transition: height $transition-ease-method $transition-duration/2;
+		overflow: hidden;
+	}
+
+	.is-open {
+		transition: height $transition-ease-method $transition-duration/2;
+		overflow: hidden;
+	}
+
+	// !IMPORTANT for calculation
+	.is-calculating {
+		position: absolute !important;
+		visibility: hidden !important;
+		display: block !important;
+		height: auto !important;
+	}
+}
+
+/* ---------------------------------------------------
+Context: Default
+--------------------------------------------------- */
+.c-accordion--default {
+	/*
+	Header/ Toggle Button
+	----------------------- */
+	.accordion__btn {
+		color: #666;
+		display: block;
+		font-size: 2rem;
+		padding: 1rem * 2.4 0 1rem * 2.2 0;
+		position: relative;
+		text-decoration: none;
+		text-transform: uppercase;
+		background-color: rgba(255, 255, 255, 0.5);
+		margin-bottom: 2px;
+	}
+
+	.accordion__icon {
+		&::before,
+		&::after {
+			@extend %pseudo;
+
+			transition: bottom $transition-duration/2 linear $transition-duration/2, transform $transition-duration/2 linear;
+			background-color: #666;
+			height: 2px;
+			right: 10px;
+			top: 50%;
+			width: 30px;
+		}
+
+		&::after {
+			transform: rotate(90deg);
+		}
+	}
+
+	/*
+	Modifiers
+	----------------------- */
+	.is-active {
+		.accordion__icon::after {
+			transform: rotate(0deg);
+		}
+	}
+}
