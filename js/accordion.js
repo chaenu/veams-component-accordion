@@ -22,13 +22,17 @@ class Accordion extends AppModule {
 	constructor(obj) {
 		let options = {
 			openIndex: false,
-			openOnViewports: false, // array: viewport names - eg.: ['mobile', 'tablet', 'desktop-small', 'desktop']
+			openOnViewports: [
+				'desktop',
+				'tablet-large',
+				'tablet-small'
+			], // array: viewport names - eg.: ['mobile', 'tablet', 'desktop-small', 'desktop']
 			singleOpen: false,
 			activeClass: 'is-active',
 			openClass: 'is-open',
 			closeClass: 'is-closed',
 			calculatingClass: 'is-calculating',
-			removeStyles: false,
+			removeStyles: false, // TODO
 			dataMaxAttr: 'data-js-height',
 			accordionBtn: '[data-js-atom="accordion-btn"]',
 			accordionContent: '[data-js-atom="accordion-content"]'
@@ -101,11 +105,16 @@ class Accordion extends AppModule {
 	}
 
 	render() {
+		if (!App.currentMedia) {
+			console.warn('App.currentMedia is necessary to support the slider module!');
+			return;
+		}
+
 		this.removeStyles();
 		this.saveHeights(this.$accordionContents);
 		this.closeAll();
 		// Open on index if set in options
-		if (this.options.openIndex) {
+		if (this.options.openIndex && this.options.openOnViewports.indexOf(App.currentMedia) != -1) {
 			this.activateBtn(this.$accordionBtns.eq(this.options.openIndex));
 			this.slideDown(this.$accordionContents.eq(this.options.openIndex));
 		}
@@ -162,6 +171,8 @@ class Accordion extends AppModule {
 	 * Toggle the accordion content by using the id of the accordion button.
 	 *
 	 * @param {String} id - id of the target
+	 *
+	 * @public
 	 */
 	toggleContent(id) {
 		this.$target = this.$el.find(id);
@@ -231,6 +242,8 @@ class Accordion extends AppModule {
 
 	/**
 	 * Close all accordion contents and active buttons
+	 *
+	 * @public
 	 */
 	closeAll() {
 		Helpers.forEach(this.$accordionContents, (idx, item) => {
@@ -243,6 +256,8 @@ class Accordion extends AppModule {
 
 	/**
 	 * Close all accordion contents and active buttons
+	 *
+	 * @public
 	 */
 	openAll() {
 		Helpers.forEach(this.$accordionContents, (idx, item) => {
