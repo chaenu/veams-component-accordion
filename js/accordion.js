@@ -2,6 +2,7 @@
  * Represents a simple accordion with transitions and max-height.
  *
  * @module Accordion
+ * @version v1.0.2
  *
  * @author Sebastian Fitzner
  */
@@ -39,11 +40,24 @@ class Accordion extends AppModule {
 		};
 
 		super(obj, options);
+		App.registerModule && App.registerModule(Accordion.info, this.el);
 	}
 
 	/**
 	 * GETTER AND SETTER
 	 */
+	/**
+	 * Get module information
+	 */
+	static get info() {
+		return {
+			name: 'Accordion',
+			version: '1.0.2',
+			vc: true,
+			mod: false // set to true if source was modified in project
+		};
+	}
+
 	set $accordionContents(items) {
 		this._$accordionContents = items;
 	}
