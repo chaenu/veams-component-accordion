@@ -1,3 +1,6 @@
+### v1.1.1
+- update README.md
+
 ### v1.1.0
 - fix #1: refactor wrapWith options in partial
 - use boolean and number instead of string in options
