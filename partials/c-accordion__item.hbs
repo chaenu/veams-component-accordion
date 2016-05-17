@@ -2,12 +2,12 @@
  Accordion Item
  --- }}
 
-<div class="accordion__item">
-
+{{#unless options.noWrapper}}
+	<div class="accordion__item">
+{{/unless}}
 	<div class="accordion__header">
 		<a href="#{{options.accItemId}}" class="accordion__btn" data-js-atom="accordion-btn">
-			{{options.accButton}}
-			<span class="accordion__icon"></span>
+			<span class="accordion__btn-inner">{{options.accButton}}</span>
 		</a>
 	</div>
 
@@ -16,4 +16,6 @@
 			{{{yield}}}
 		</div>
 	</div>
-</div>
+{{#unless options.noWrapper}}
+	</div>
+{{/unless}}

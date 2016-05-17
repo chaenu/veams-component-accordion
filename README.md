@@ -4,7 +4,33 @@ This component is based on the blueprint of Veams-Components.
 
 It represents a simple accordion with `transitions` and `max-height`.
 
+## Requirements
+### Sass
+- `_get-media.scss`
+
 ## Usage
+
+### Options:
+
+#### openIndex
+`Type: Number` | `Default: false`
+
+Index of panel to be opened on init (zero based)
+
+#### openOnViewports
+`Type: Array` | `Default: ['desktop', 'tablet-large', 'tablet-small']`
+
+Viewports on which the openIndex panel is opened on init
+
+#### singleOpen
+`Type: Boolean` | `Default: false`
+
+If set to true, only one panel can be open at the same time
+
+#### tabMode
+`Type: Boolean` | `Default: false`
+
+If set to true, the accordion behaves like a tab module (click on active button will not close corresponding panel).
 
 ### Include: Page
 
@@ -12,7 +38,7 @@ It represents a simple accordion with `transitions` and `max-height`.
 {{! @INSERT :: START @id: accordion, @tag: component-partial }}
 {{#with accordion-bp.simple}}
 	{{! WrapWith START: Accordion }}
-		{{#wrapWith "c-accordion"}}
+		{{#wrapWith "c-accordion" data=this.accordionOptions}}
 		{{! WrapWith START: Item }}
 			{{#wrapWith "c-accordion__item" accItemId="test-1" accButton="Item 1"}}
 				Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab aliquid assumenda, ducimus facilis inventore iste labore laborum libero nam necessitatibus neque nulla numquam perspiciatis rem, repudiandae sed soluta veniam vero.
@@ -27,7 +53,7 @@ It represents a simple accordion with `transitions` and `max-height`.
 
 {{#with accordion-bp.custom}}
 {{! WrapWith START: Accordion }}
-	{{#wrapWith "c-accordion" jsOptions=this.accordionOptions.jsOptions}}
+	{{#wrapWith "c-accordion" data=this.accordionOptions}}
 	{{! WrapWith START: Item }}
 		{{#wrapWith "c-accordion__item" accItemId="test-3" accButton="Item 3"}}
 			Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab aliquid assumenda, ducimus facilis inventore iste labore laborum libero nam necessitatibus neque nulla numquam perspiciatis rem, repudiandae sed soluta veniam vero.

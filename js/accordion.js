@@ -2,9 +2,10 @@
  * Represents a simple accordion with transitions and max-height.
  *
  * @module Accordion
- * @version v1.0.2
+ * @version v1.1.0
  *
  * @author Sebastian Fitzner
+ * @author Andy Gutsche
  */
 
 /**
@@ -33,10 +34,12 @@ class Accordion extends AppModule {
 			openClass: 'is-open',
 			closeClass: 'is-closed',
 			calculatingClass: 'is-calculating',
+			unresolvedClass: 'is-unresolved',
 			removeStyles: false, // TODO
 			dataMaxAttr: 'data-js-height',
 			accordionBtn: '[data-js-atom="accordion-btn"]',
-			accordionContent: '[data-js-atom="accordion-content"]'
+			accordionContent: '[data-js-atom="accordion-content"]',
+			tabMode: false
 		};
 
 		super(obj, options);
@@ -46,13 +49,14 @@ class Accordion extends AppModule {
 	/**
 	 * GETTER AND SETTER
 	 */
+
 	/**
 	 * Get module information
 	 */
 	static get info() {
 		return {
 			name: 'Accordion',
-			version: '1.0.2',
+			version: '1.1.0',
 			vc: true,
 			mod: false // set to true if source was modified in project
 		};
@@ -120,17 +124,25 @@ class Accordion extends AppModule {
 
 	render() {
 		if (!App.currentMedia) {
-			console.warn('App.currentMedia is necessary to support the slider module!');
+			console.warn('Accordion: App.currentMedia is necessary to support the slider module!');
 			return;
 		}
 
 		this.removeStyles();
 		this.saveHeights(this.$accordionContents);
 		this.closeAll();
+
 		// Open on index if set in options
-		if (this.options.openIndex && this.options.openOnViewports.indexOf(App.currentMedia) != -1) {
-			this.activateBtn(this.$accordionBtns.eq(this.options.openIndex));
-			this.slideDown(this.$accordionContents.eq(this.options.openIndex));
+		if (typeof this.options.openIndex === 'number') {
+
+			if (this.options.tabMode || this.options.openOnViewports.indexOf(App.currentMedia) !== -1) {
+				this.activateBtn(this.$accordionBtns.eq(this.options.openIndex));
+				this.slideDown(this.$accordionContents.eq(this.options.openIndex));
+			}
+		}
+
+		if (this.$el.hasClass(this.options.unresolvedClass)) {
+			this.$el.removeClass(this.options.unresolvedClass);
 		}
 	}
 
@@ -178,6 +190,11 @@ class Accordion extends AppModule {
 		let targetId = this.$btn.attr('href');
 
 		e.preventDefault();
+
+		if (this.options.tabMode && this.$btn.hasClass(this.options.activeClass)) {
+			return;
+		}
+
 		this.toggleContent(targetId);
 	}
 
@@ -195,7 +212,10 @@ class Accordion extends AppModule {
 			this.slideUp(this.$target);
 			this.deactivateBtn(this.$btn);
 		} else {
-			if (this.options.singleOpen) this.closeAll();
+
+			if (this.options.singleOpen || this.options.tabMode) {
+				this.closeAll();
+			}
 
 			this.activateBtn(this.$btn);
 			this.slideDown(this.$target);
@@ -208,12 +228,13 @@ class Accordion extends AppModule {
 	 * @param {Object} $item - jQuery object of item
 	 */
 	slideUp($item) {
+
 		$item
-			.css('height', 0)
-			.removeAttr('style')
-			.attr('aria-expanded', 'false')
-			.removeClass(this.options.openClass)
-			.addClass(this.options.closeClass);
+				.css('height', 0)
+				.removeAttr('style')
+				.attr('aria-expanded', 'false')
+				.removeClass(this.options.openClass)
+				.addClass(this.options.closeClass);
 	}
 
 	/**
@@ -222,11 +243,12 @@ class Accordion extends AppModule {
 	 * @param {Object} $item - jQuery object of item
 	 */
 	slideDown($item) {
+
 		$item
-			.css('height', $item.attr('data-js-height'))
-			.attr('aria-expanded', 'true')
-			.removeClass(this.options.closeClass)
-			.addClass(this.options.openClass);
+				.css('height', $item.attr('data-js-height'))
+				.attr('aria-expanded', 'true')
+				.removeClass(this.options.closeClass)
+				.addClass(this.options.openClass);
 	}
 
 	/**
