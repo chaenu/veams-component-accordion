@@ -75,9 +75,7 @@ Context: Default
 		text-transform: uppercase;
 		background-color: rgba(255, 255, 255, 0.5);
 		margin-bottom: 2px;
-	}
 
-	.accordion__icon {
 		&::before,
 		&::after {
 			@extend %pseudo;
@@ -93,14 +91,16 @@ Context: Default
 		&::after {
 			transform: rotate(90deg);
 		}
+
+		&.is-active {
+
+			&::after {
+				transform: rotate(0deg);
+			}
+		}
 	}
 
-	/*
-	Modifiers
-	----------------------- */
-	.is-active {
-		.accordion__icon::after {
-			transform: rotate(0deg);
-		}
+	.accordion__icon {
+		position: relative;
 	}
 }

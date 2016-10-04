@@ -1,3 +1,6 @@
+### v1.1.2
+- apply icon styles to button
+
 ### v1.1.1
 - update README.md
 
