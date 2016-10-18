@@ -4,11 +4,14 @@ This component is based on the blueprint of Veams-Components.
 
 It represents a simple accordion with `transitions` and `max-height`.
 
+## Version
+
+Latest version is ```v1.1.2```
+
 ## Requirements
 
 ### JavaScript
-- `App.currentMedia` functionality in Veams-JS
-- `App.EVENTS.resize` object in Veams-JS
+- `Veams-JS >= v3.6.0`
 
 ### Sass
 - `_get-media.scss`
