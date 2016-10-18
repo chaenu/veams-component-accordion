@@ -23,7 +23,7 @@ var $ = App.$;
 class Accordion extends AppModule {
 	constructor(obj) {
 		let options = {
-			openIndex: false,
+			openIndex: null,
 			openOnViewports: [
 				'desktop',
 				'tablet-large',
