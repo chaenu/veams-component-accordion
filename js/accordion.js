@@ -2,7 +2,7 @@
  * Represents a simple accordion with transitions and max-height.
  *
  * @module Accordion
- * @version v1.1.2
+ * @version v2.0.0
  *
  * @author Sebastian Fitzner
  * @author Andy Gutsche
@@ -56,7 +56,7 @@ class Accordion extends AppModule {
 	static get info() {
 		return {
 			name: 'Accordion',
-			version: '1.1.2',
+			version: '2.0.0',
 			vc: true,
 			mod: false // set to true if source was modified in project
 		};
@@ -114,7 +114,7 @@ class Accordion extends AppModule {
 		let fnOpenAll = this.openAll.bind(this);
 
 		// Local events
-		this.$el.on('click touchstart', this.options.accordionBtn, fnHandleClick);
+		this.$el.on(Helpers.clickHandler(), this.options.accordionBtn, fnHandleClick);
 
 		// Global events
 		App.Vent.on(App.EVENTS.resize, fnRender);
@@ -163,19 +163,19 @@ class Accordion extends AppModule {
 	 * @param {Object} item - item to calculate the height
 	 */
 	saveHeight(item) {
-		let el = item;
-		let wantedHeight = 0;
+		let $el = $(item);
+
 		// the el is hidden so:
 		// making the el block so we can measure its height but still be hidden
-		$(el).addClass(this.options.calculatingClass);
+		$el.addClass(this.options.calculatingClass);
 
-		wantedHeight = Helpers.getOuterHeight(el);
+		let wantedHeight = $el.outerHeight();
 
 		// reverting to the original values
-		$(el).removeClass(this.options.calculatingClass);
+		$el.removeClass(this.options.calculatingClass);
 
 		// save height in data attribute
-		el.setAttribute(this.options.dataMaxAttr, wantedHeight);
+		$el.attr(this.options.dataMaxAttr, wantedHeight);
 	}
 
 	/**
@@ -184,9 +184,10 @@ class Accordion extends AppModule {
 	 * execute the toggleContent method.
 	 *
 	 * @param {Object} e - event object
+	 * @param {object} currentTarget - Target to which listener was attached.
 	 */
-	handleClick(e) {
-		this.$btn = $(e.currentTarget);
+	handleClick(e, currentTarget) {
+		this.$btn = currentTarget ? $(currentTarget) : $(e.currentTarget);
 		let targetId = this.$btn.attr('href');
 
 		e.preventDefault();

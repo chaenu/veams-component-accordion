@@ -1,12 +1,12 @@
 {
 	"simple": {
-		"accordionOptions": {
+		"settings": {
 			"contextClass": "default",
 			"classes": false
 		}
 	},
 	"custom": {
-		"accordionOptions": {
+		"settings": {
 			"contextClass": "custom",
 			"classes": "is-some-modifier",
 			"jsOptions": [
