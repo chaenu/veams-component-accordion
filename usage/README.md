@@ -21,7 +21,7 @@ Latest version is ```v2.0.0```
 ### Options:
 
 #### openIndex
-`Type: Number` | `Default: false`
+`Type: Number` | `Default: null`
 
 Index of panel to be opened on init (zero based)
 
