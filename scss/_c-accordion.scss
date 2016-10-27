@@ -1,60 +1,42 @@
 /* ===================================================
-Accordion
+Component: accordion
 =================================================== */
 
+/* ---------------------------------------------------
+Local vars
+--------------------------------------------------- */
+$duration-transition-base: .3s;
+$color-1: #EBEBEB;
+$color-2: #FFF;
+$color-3: #666;
+
+/* ---------------------------------------------------
+Global Styles
+--------------------------------------------------- */
 [data-css="c-accordion"] {
-	position: relative;
+	width: 100%;
+	
+	.accordion__title {
+		cursor: pointer;
+		
+		// Title styles if linked content is hidden
+		&[aria-selected="false"] {
 
-	/*
-	Unresolved
-	----------------------- */
-	&.is-unresolved {
-	}
+		}
+		
+		// Title styles if linked content is visible
+		&[aria-selected="true"] {
 
-	/*
-	Wrapper Item
-	----------------------- */
-	.accordion__item {
-	}
-
-	/*
-	Header/ Toggle Button
-	----------------------- */
-	.accordion__header {
-	}
-	.accordion__btn {
-	}
-	.accordion__icon {
+		}
 	}
 
-	/*
-	Content/ Toggle Content
-	----------------------- */
 	.accordion__content {
-	}
-	.accordion__content-inner {
-	}
-
-	/*
-	Modifiers
-	----------------------- */
-	.is-closed {
-		height: 0;
-		transition: height $transition-ease-method $transition-duration/2;
 		overflow: hidden;
-	}
-
-	.is-open {
-		transition: height $transition-ease-method $transition-duration/2;
-		overflow: hidden;
-	}
-
-	// !IMPORTANT for calculation
-	.is-calculating {
-		position: absolute !important;
-		visibility: hidden !important;
-		display: block !important;
-		height: auto !important;
+		transition: height $duration-transition-base ease-in-out;
+		
+		&[aria-hidden="true"] {
+			visibility: hidden; // otherwise user is able to focus elements inside the hidden content section
+		}
 	}
 }
 
@@ -62,45 +44,76 @@ Accordion
 Context: Default
 --------------------------------------------------- */
 .c-accordion--default {
-	/*
-	Header/ Toggle Button
-	----------------------- */
-	.accordion__btn {
-		color: #666;
-		display: block;
-		font-size: 2rem;
-		padding: 1rem * 2.4 0 1rem * 2.2 0;
-		position: relative;
-		text-decoration: none;
-		text-transform: uppercase;
-		background-color: rgba(255, 255, 255, 0.5);
-		margin-bottom: 2px;
+	border: 1px solid $color-1;
 
+	.accordion__title {
+		position: relative;
+		margin: 0;
+		padding: 20px 50px 20px 15px;
+		font-size: 22px;
+		
+		&:hover,
+		&:focus,
+		&:active {
+			background-color: $color-3;
+		}
+		
 		&::before,
 		&::after {
-			@extend %pseudo;
-
-			transition: bottom $transition-duration/2 linear $transition-duration/2, transform $transition-duration/2 linear;
-			background-color: #666;
+			content: '';
+			position: absolute;
+			top: 30px;
+			right: 20px;
+			width: 22px;
 			height: 2px;
-			right: 10px;
-			top: 50%;
-			width: 30px;
 		}
 
 		&::after {
 			transform: rotate(90deg);
+			transform-origin: center;
+			transition: opacity $duration-transition-base ease-in-out; 
 		}
 
-		&.is-active {
-
+		&:nth-child(4n+1) {
+			background-color: $color-1;
+			
+			&::before,
 			&::after {
-				transform: rotate(0deg);
+				background-color: $color-2;
+			}
+		}
+
+		&:nth-child(4n+3) {
+			background-color: $color-2;
+			
+			&::before,
+			&::after {
+				background-color: $color-1;
+			}
+		}
+		
+		&[aria-selected="false"] {
+			&::after {
+				opacity: 1;
+			}
+		}
+		
+		&[aria-selected="true"] {
+			&::after {
+				opacity: 0;
 			}
 		}
 	}
 
-	.accordion__icon {
-		position: relative;
+	.accordion__content {
+		padding: 0 15px;
+		
+		&:nth-child(4n+2) {
+			background-color: $color-1;
+		}
+
+		&:nth-child(4n+4) {
+			background-color: $color-2;
+		}
 	}
 }

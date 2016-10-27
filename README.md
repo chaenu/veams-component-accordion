@@ -2,7 +2,21 @@
 
 This component is based on the blueprint of Veams-Components. 
 
-It represents a simple accordion with `transitions` and `max-height`.
+The accordion displays 1-x items which get (each) toggled via a related trigger.
+An item contains a tab (trigger) and a panel (content).
+
+First, all panels are expanded, because the height of each panel gets measured and stored. Afterwards the panels are closed according to the configuration. Therefore the accordion is built based on the principles of progressive enhancement and guarantees no-js support.
+
+
+## Possible configuration options:
+- Multiselectable: If two or more items can be open at the same time (default value: false)
+- Items: An array, where amount of objects equals accordion items. Set key 'isExanded'
+to true or false to set a default state on initialize for every item.
+
+
+## Usage
+- Do not hide an accordion wrapping container initially. Otherwise the measure of the panel height will fail.
+
 
 ## Version
 
@@ -13,64 +27,23 @@ Latest version is ```v1.1.2```
 ### JavaScript
 - `Veams-JS >= v3.6.0`
 
-### Sass
-- `_get-media.scss`
-
-## Usage
-
-### Options:
-
-#### openIndex
-`Type: Number` | `Default: false`
-
-Index of panel to be opened on init (zero based)
-
-#### openOnViewports
-`Type: Array` | `Default: ['desktop', 'tablet-large', 'tablet-small']`
-
-Viewports on which the openIndex panel is opened on init
-
-#### singleOpen
-`Type: Boolean` | `Default: false`
-
-If set to true, only one panel can be open at the same time
-
-#### tabMode
-`Type: Boolean` | `Default: false`
-
-If set to true, the accordion behaves like a tab module (click on active button will not close corresponding panel).
-
 ### Include: Page
 
 ``` hbs
 {{! @INSERT :: START @id: accordion, @tag: component-partial }}
 {{#with accordion-bp.simple}}
 	{{! WrapWith START: Accordion }}
-		{{#wrapWith "c-accordion" data=this.accordionOptions}}
+		{{#wrapWith "c-accordion" context=this.accordionOptions.context cssClasses=this.accordionOptions.cssClasses jsOptions=this.accordionOptions.jsOptions}}
 		{{! WrapWith START: Item }}
-			{{#wrapWith "c-accordion__item" accItemId="test-1" accButton="Item 1"}}
+			{{#wrapWith "c-accordion__item" id="item1" position=1 headline="test headline 1"}}
 				Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab aliquid assumenda, ducimus facilis inventore iste labore laborum libero nam necessitatibus neque nulla numquam perspiciatis rem, repudiandae sed soluta veniam vero.
 			{{/wrapWith}}
-			{{#wrapWith "c-accordion__item" accItemId="test-2" accButton="Item 2"}}
+			{{#wrapWith "c-accordion__item" id="item2" position=2 headline="test headline 2"}}
 				Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab aliquid assumenda, ducimus facilis inventore iste labore laborum libero nam necessitatibus neque nulla numquam perspiciatis rem, repudiandae sed soluta veniam vero.
 			{{/wrapWith}}
 		{{! WrapWith END: Item }}
 		{{/wrapWith}}
 	{{! WrapWith END: Accordion }}
-{{/with}}
-
-{{#with accordion-bp.custom}}
-{{! WrapWith START: Accordion }}
-	{{#wrapWith "c-accordion" data=this.accordionOptions}}
-	{{! WrapWith START: Item }}
-		{{#wrapWith "c-accordion__item" accItemId="test-3" accButton="Item 3"}}
-			Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab aliquid assumenda, ducimus facilis inventore iste labore laborum libero nam necessitatibus neque nulla numquam perspiciatis rem, repudiandae sed soluta veniam vero.
-		{{/wrapWith}}
-		{{#wrapWith "c-accordion__item" accItemId="test-4" accButton="Item 4"}}
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab aliquid assumenda, ducimus facilis inventore iste labore laborum libero nam necessitatibus neque nulla numquam perspiciatis rem, repudiandae sed soluta veniam vero.		{{/wrapWith}}
-	{{! WrapWith END: Item }}
-	{{/wrapWith}}
-{{! WrapWith END: Accordion }}
 {{/with}}
 {{! @INSERT :: END }}
 ```
@@ -127,8 +100,9 @@ Helpers.loadModule({
  * Events Accordion
  */
 EVENTS.accordion = {
-	openAll: 'accordion:openAll',
-	closeAll: 'accordion:closeAll'
+	toggleItem: 'accordion:toggleItem',
+	itemClosed: 'accordion:itemClosed',
+	itemOpened: 'accordion:itemOpened'
 };
 // @INSERT :: END
 ```

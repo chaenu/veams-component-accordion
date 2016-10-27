@@ -1,12 +1,27 @@
-{{!
----
-component: accordion
----
-}}
+{{! ---
+component: c-accordion
+============================================
 
-<div class="c-accordion{{#if options.data.contextClass}}--{{options.data.contextClass}}{{else}}--default{{/if}}{{#if options.data.classes}} {{options.data.classes}}{{/if}}"
-     data-css="c-accordion" data-js-module="accordion"{{#if options.data.jsOptions}} data-js-options='{
-     {{#each options.data.jsOptions}}"{{jsKey}}": {{#unless jsObject}}"{{/unless}}{{{jsValue}}}{{#unless jsObject}}"{{/unless}}{{#if @last}}{{else}}, {{/if}}{{/each}}
-     }'{{/if}}>
-	{{{yield}}}
+Requirements:
+- 1-x c-accordion__item.hbs as child
+
+Options:
+- context {String} [default] - Just pass a string
+- cssClasses {String} - Modifier classes
+- jsOptions {Array} - Array with keys and values
+- jsOptions.key {String} - Define a key (i.e. openFirstItem)
+- jsOptions.value {String} - Define a value (i.e. true)
+
+--- }}
+
+<div class="c-accordion{{#if options.context}}--{{options.context}}{{else}}--default{{/if}}{{#if options.cssClasses}} {{options.cssClasses}}{{/if}}"
+     data-css="c-accordion"
+     role="tablist"
+     data-js-module="accordion"
+     data-js-options='{
+     	{{#each options.jsOptions}}"{{this.key}}": {{#unless this.object}}"{{/unless}}{{{this.value}}}{{#unless this.object}}"{{/unless}}{{#if @last}}{{else}}, {{/if}}{{/each}}
+     }'>
+     
+     {{{yield}}}
+     
 </div>

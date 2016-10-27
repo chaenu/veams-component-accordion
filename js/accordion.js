@@ -1,54 +1,53 @@
 /**
- * Represents a simple accordion with transitions and max-height.
+ * Accordion
+ * 
+ * Displaying 1-x items which get (each) toggled via a related trigger.
+ * An item contains a tab (trigger) and a panel (content).
  *
+ * Possible configuration options:
+ * - Multiselectable: If two or more items can be open at the same time (default value: false)
+ * - Items: An array, where amount of objects equals accordion items. Set key 'isExanded'
+ * to true or false to set a default state on initialize for every item.
+ * 
  * @module Accordion
- * @version v1.1.2
- *
- * @author Sebastian Fitzner
- * @author Andy Gutsche
+ * @version v1.0.0
+ * 
+ * @author Thomas Kaenel
  */
 
-/**
- * Requirements
- */
 import Helpers from '../../utils/helpers';
 import App from '../../app';
 import AppModule from '../_global/module';
+const $ = App.$;
 
-var $ = App.$;
-
-/**
- * Class Accordion
- */
 class Accordion extends AppModule {
+	/**
+	 * Constructor for our class
+	 *
+	 * @see module.js
+	 *
+	 * @param {Object} obj - Object which is passed to our class
+	 * @param {Object} obj.el - element which will be saved in this.el
+	 * @param {Object} obj.options - options which will be passed in as JSON object
+	 */
 	constructor(obj) {
 		let options = {
-			openIndex: false,
-			openOnViewports: [
-				'desktop',
-				'tablet-large',
-				'tablet-small'
-			], // array: viewport names - eg.: ['mobile', 'tablet', 'desktop-small', 'desktop']
-			singleOpen: false,
-			activeClass: 'is-active',
-			openClass: 'is-open',
-			closeClass: 'is-closed',
-			calculatingClass: 'is-calculating',
-			unresolvedClass: 'is-unresolved',
-			removeStyles: false, // TODO
-			dataMaxAttr: 'data-js-height',
-			accordionBtn: '[data-js-atom="accordion-btn"]',
-			accordionContent: '[data-js-atom="accordion-content"]',
-			tabMode: false
+			keyCodes: {
+				enter: 13,
+				space: 32,
+				left: 37,
+				up: 38,
+				right: 39,
+				down: 40
+			},
+			triggerElement: '[data-js-atom="trigger"]',
+			panelElement: '[data-js-atom="panel"]'
 		};
 
 		super(obj, options);
 		App.registerModule && App.registerModule(Accordion.info, this.el);
 	}
 
-	/**
-	 * GETTER AND SETTER
-	 */
 
 	/**
 	 * Get module information
@@ -56,254 +55,353 @@ class Accordion extends AppModule {
 	static get info() {
 		return {
 			name: 'Accordion',
-			version: '1.1.2',
-			vc: true,
-			mod: false // set to true if source was modified in project
+			version: '1.0.0'
 		};
 	}
 
-	set $accordionContents(items) {
-		this._$accordionContents = items;
-	}
-
-	get $accordionContents() {
-		return this._$accordionContents;
-	}
-
-	set $accordionBtns(items) {
-		this._$accordionBtns = items;
-	}
-
-	get $accordionBtns() {
-		return this._$accordionBtns;
-	}
-
-	set $target(item) {
-		this._$target = item;
-	}
-
-	get $target() {
-		return this._$target;
-	}
-
-	set $btn(item) {
-		this._$btn = item;
-	}
-
-	get $btn() {
-		return this._$btn;
-	}
-
-	initialize() {
-		this.$accordionContents = $(this.options.accordionContent, this.$el);
-		this.$accordionBtns = $(this.options.accordionBtn, this.$el);
-		this.$target = null;
-		this.$btn = null;
-
-		// call super
-		super.initialize();
-	}
 
 	/**
-	 * Bind all events
+	 * Initialize the view and merge options
 	 */
-	bindEvents() {
-		let fnRender = this.render.bind(this);
-		let fnHandleClick = this.handleClick.bind(this);
-		let fnCloseAll = this.closeAll.bind(this);
-		let fnOpenAll = this.openAll.bind(this);
+	initialize() {
+		this.$previousTrigger = $();
+		this.$previousPanel = $();
+		this.panelHeightList = [];
+		this.selectedIndex = -1;
+		this.previousIndex = -1;
+		this.initialized = false;
 
-		// Local events
-		this.$el.on('click touchstart', this.options.accordionBtn, fnHandleClick);
+		this.itemStateList = this.options.items || [];
+		this.multiselectable = (this.options.multiselectable === "true");
 
-		// Global events
-		App.Vent.on(App.EVENTS.resize, fnRender);
-		App.Vent.on(App.EVENTS.accordion.closeAll, fnCloseAll);
-		App.Vent.on(App.EVENTS.accordion.openAll, fnOpenAll);
-	}
+		console.log('init Accordion');
+		
+		super.initialize();
 
-	render() {
-		if (!App.currentMedia) {
-			console.warn('Accordion: App.currentMedia is necessary to support the slider module!');
-			return;
-		}
+		this.$triggerList = this.$el.find(this.options.triggerElement);
+		this.$panelList = this.$el.find(this.options.panelElement);
+		this.$currentTrigger = $(this.$triggerList[this.selectedIndex]);
+		this.$currentPanel = $(this.$panelList[this.selectedIndex]);
 
-		this.removeStyles();
-		this.saveHeights(this.$accordionContents);
-		this.closeAll();
+		this.getHeight();
 
-		// Open on index if set in options
-		if (typeof this.options.openIndex === 'number') {
+		this.initModel();
 
-			if (this.options.tabMode || this.options.openOnViewports.indexOf(App.currentMedia) !== -1) {
-				this.activateBtn(this.$accordionBtns.eq(this.options.openIndex));
-				this.slideDown(this.$accordionContents.eq(this.options.openIndex));
+		// set initial Index
+		for (let i = 0; i < this.itemStateList.length; i++) {
+			if (this.itemStateList[i].isExpanded) {
+				this.selectedIndex = this.previousIndex = i;
 			}
 		}
-
-		if (this.$el.hasClass(this.options.unresolvedClass)) {
-			this.$el.removeClass(this.options.unresolvedClass);
-		}
 	}
 
+
 	/**
-	 * Save heights of all accordion contents.
-	 *
-	 * @param {Array} items - array of items
+	 * Bind events
 	 */
-	saveHeights(items) {
-		Helpers.forEach(items, (idx, item) => {
-			this.saveHeight(item);
-		});
+	bindEvents() {
+		let self = this;
+
+		// Local events
+		this.$el.on('click', this.options.triggerElement, self.handleClick.bind(self));
+		this.$el.on('keyup', this.options.triggerElement, self.handleKeyUp.bind(self));
+
+		// Global events
+		App.Vent.on(App.EVENTS.accordion.toggleItem, self.toggleItem.bind(self) );
+		App.Vent.on(App.EVENTS.resize, self.getHeight.bind(self) );
+		// App.Vent.on(App.EVENTS.fontLoaded, self.getHeight.bind(self) ); // ToDo: include? comment?
 	}
 
-	/**
-	 * Save the height of the node item.
-	 *
-	 * @param {Object} item - item to calculate the height
-	 */
-	saveHeight(item) {
-		let el = item;
-		let wantedHeight = 0;
-		// the el is hidden so:
-		// making the el block so we can measure its height but still be hidden
-		$(el).addClass(this.options.calculatingClass);
-
-		wantedHeight = Helpers.getOuterHeight(el);
-
-		// reverting to the original values
-		$(el).removeClass(this.options.calculatingClass);
-
-		// save height in data attribute
-		el.setAttribute(this.options.dataMaxAttr, wantedHeight);
-	}
 
 	/**
-	 * Handle the click,
-	 * get the id of the clicked button and
-	 * execute the toggleContent method.
-	 *
-	 * @param {Object} e - event object
-	 */
+	* Handle click input
+	* 
+	* @param {event} e - event object
+	*/
 	handleClick(e) {
-		this.$btn = $(e.currentTarget);
-		let targetId = this.$btn.attr('href');
+		let $target = $(e.currentTarget);
 
 		e.preventDefault();
 
-		if (this.options.tabMode && this.$btn.hasClass(this.options.activeClass)) {
+		this.selectedIndex = this.$triggerList.index($target);
+
+		this.updateSelectedElements();
+		this.updateModel();
+		this.toggle();
+	}
+
+
+	/**
+	* Handle key input events
+	* 
+	* @param {event} e - event object
+	*/
+	handleKeyUp(e) {
+		let $target = $(e.currentTarget);
+
+		e.preventDefault();
+
+		switch (e.keyCode) {
+			case this.options.keyCodes.enter:
+			case this.options.keyCodes.space:
+				this.updateModel();
+				this.toggle();
+				break;
+
+			case this.options.keyCodes.left:
+			case this.options.keyCodes.up:
+				this.selectPrevious();
+				this.addFocus();
+				break;
+
+			case this.options.keyCodes.right:
+			case this.options.keyCodes.down:
+				this.selectNext();
+				this.addFocus();
+				break;
+		}
+
+		// Todo:
+		// add more usecases, see 
+		// https://www.w3.org/TR/2013/WD-wai-aria-practices-20130307/#accordion
+		// http://www.oaa-accessibility.org/example/37/
+	}
+
+
+	/**
+	 * Get the height of all items 
+	 */
+	getHeight() {
+		let height;
+
+		if (this.initialized) {
+			// empty array first
+			this.panelHeightList.splice(0, this.panelHeightList.length);
+
+			// we need to reset all items to get correct height
+			this.destroy();
+		}
+
+		$.each(this.$panelList, (index, panel) => {
+			height = $(panel).height()
+
+			this.panelHeightList.push(height);
+
+			if (height <= 0) {
+				console.warn("Accordion: The height of panel #" + (index + 1) + " is not positive! Please make sure, that there's no style that hides it initially.")
+			}
+		});
+
+		if (this.initialized) {
+			this.render();
+		}
+	}
+
+
+	/**
+	* Toggle an accordion item based on the ID set on the trigger
+	* 
+	* @param {obj} data - data object which is passed with the global event
+	* @param {string} data.id - the ID of the accordion item you'd like to toggle
+	* @param {boolean} data.openItem - Optinal. if you want to open (true) or close (false) the accordion item
+	*/
+	toggleItem(data) {	
+		let $target;
+		let itemIndex;
+
+		if (!data || !data.id) {
+			console.warn("Accordion: No item ID was passed.")
 			return;
 		}
 
-		this.toggleContent(targetId);
+		$target = this.$el.find(data.id);
+		itemIndex = this.$triggerList.index($target);
+
+		if (itemIndex < 0) {
+			console.warn("Accordion: Passed ID does not exist.")
+			return;
+		}
+
+		// if a desired state is defined, check if we should toggle
+		if (data.openItem !== undefined) {
+			if (data.openItem && this.itemStateList[itemIndex].isExpanded) {
+				console.warn("Accordion: Item with passed ID is already open.")
+				return;
+			}
+			if (!data.openItem && !this.itemStateList[itemIndex].isExpanded) {
+				console.warn("Accordion: Item with passed ID is already closed.")
+				return;
+			}
+		}
+
+		this.selectedIndex = itemIndex;
+
+		this.updateSelectedElements();
+		this.updateModel();
+		this.toggle();
 	}
 
+
 	/**
-	 * Toggle the accordion content by using the id of the accordion button.
-	 *
-	 * @param {String} id - id of the target
-	 *
-	 * @public
+	 * Initialize the model
 	 */
-	toggleContent(id) {
-		this.$target = this.$el.find(id);
+	initModel() {
+		if (this.itemStateList.length !== this.$triggerList.length) {
+			console.warn("Accordion: The number of items in the DOM is different to the number of items defined in the module options.");
+		}
 
-		if (this.$target.hasClass(this.options.openClass)) {
-			this.slideUp(this.$target);
-			this.deactivateBtn(this.$btn);
-		} else {
-
-			if (this.options.singleOpen || this.options.tabMode) {
-				this.closeAll();
+		// Add missing items to model with default state (closed)
+		if (this.itemStateList.length < this.$triggerList.length) {
+			for (let i = 0; i < this.$triggerList.length; i++) {
+				if (!this.itemStateList[i]) {
+					this.itemStateList[i] = { isExpanded: false }
+				}
 			}
-
-			this.activateBtn(this.$btn);
-			this.slideDown(this.$target);
 		}
 	}
 
-	/**
-	 * Mimics the slideUp functionality of jQuery by using height and transition.
-	 *
-	 * @param {Object} $item - jQuery object of item
-	 */
-	slideUp($item) {
 
-		$item
-				.css('height', 0)
-				.removeAttr('style')
-				.attr('aria-expanded', 'false')
-				.removeClass(this.options.openClass)
-				.addClass(this.options.closeClass);
+	/**
+	 * Update the model and save the desired state of the items
+	 */
+	updateModel() {
+		this.itemStateList[this.selectedIndex].isExpanded = !this.itemStateList[this.selectedIndex].isExpanded;
+
+		if (!this.multiselectable && this.selectedIndex !== this.previousIndex) {
+			this.itemStateList[this.previousIndex].isExpanded = false;
+		}
 	}
 
-	/**
-	 * Mimics the slideDown functionality of jQuery by using height and transition.
-	 *
-	 * @param {Object} $item - jQuery object of item
-	 */
-	slideDown($item) {
 
-		$item
-				.css('height', $item.attr('data-js-height'))
-				.attr('aria-expanded', 'true')
-				.removeClass(this.options.closeClass)
-				.addClass(this.options.openClass);
+	/**
+	 * Update the selected elements
+	 */
+	updateSelectedElements() {
+		this.$currentTrigger = $(this.$triggerList[this.selectedIndex]);
+		this.$currentPanel = $(this.$panelList[this.selectedIndex]);
+
+		this.$previousTrigger = $(this.$triggerList[this.previousIndex]);
+		this.$previousPanel = $(this.$panelList[this.previousIndex]);
 	}
 
-	/**
-	 * Adds active class to the clicked button.
-	 *
-	 * @param {Object} $item - jQuery object of button
-	 */
-	activateBtn($item) {
-		$item.addClass(this.options.activeClass);
-	}
 
 	/**
-	 * Removes active class from the button.
-	 *
-	 * @param {Object} $item - jQuery object of button
+	 * Select previous item in the list of all items
 	 */
-	deactivateBtn($item) {
-		$item.removeClass(this.options.activeClass);
+	selectPrevious() {
+		if (this.selectedIndex === 0) {
+			this.selectedIndex = this.$triggerList.length;
+		}
+		this.selectedIndex = (this.selectedIndex - 1) % this.$triggerList.length;
+
+		this.updateSelectedElements();
 	}
 
-	/**
-	 * Remove all styles of the accordion content elements
-	 */
-	removeStyles() {
-		this.$accordionContents.removeAttr('style');
-	}
 
 	/**
-	 * Close all accordion contents and active buttons
-	 *
-	 * @public
+	 * Select next item in the list of all items
 	 */
-	closeAll() {
-		Helpers.forEach(this.$accordionContents, (idx, item) => {
-			this.slideUp($(item));
+	selectNext() {
+		this.selectedIndex = (this.selectedIndex + 1) % this.$triggerList.length;
+
+		this.updateSelectedElements();
+	}
+
+
+	/**
+	 * Add focus to the selected tab
+	 */
+	addFocus() {
+		this.$currentTrigger.focus();
+	}
+
+	
+	/**
+	 * Toggle items
+	 */
+	toggle() {
+		let isItemExpanded = this.itemStateList[this.selectedIndex].isExpanded;
+		let event = isItemExpanded ? App.EVENTS.accordion.itemOpened : App.EVENTS.accordion.itemClosed; 
+		let height = isItemExpanded ? this.panelHeightList[this.selectedIndex] : 0;
+
+		// Switch state of clicked item
+		this.$currentTrigger.attr('aria-selected', isItemExpanded)
+			.attr('aria-expanded', isItemExpanded);
+		this.$currentPanel.attr('aria-hidden', !isItemExpanded)
+			.height(height);
+
+		// Close already opened item (if not same as clicked)
+		if (!this.multiselectable && this.selectedIndex !== this.previousIndex) {
+			this.$previousTrigger.attr('aria-selected', false)
+				.attr('aria-expanded', false);
+			this.$previousPanel.attr('aria-hidden', true)
+				.height(0);
+
+			// Trigger event to inform other modules which item was closed
+			App.Vent.trigger(App.EVENTS.accordion.itemClosed, {
+				type: App.EVENTS.accordion.itemClosed,
+				instance: this
+			});
+		}
+		
+		// Trigger event to inform other modules what happened
+		App.Vent.trigger(event, {
+			type: event,
+			instance: this
 		});
-		Helpers.forEach(this.$accordionBtns, (idx, item) => {
-			this.deactivateBtn($(item));
-		});
+
+		// store trigger & panel for next toggle
+		this.previousIndex = this.selectedIndex;
 	}
 
+
 	/**
-	 * Close all accordion contents and active buttons
-	 *
-	 * @public
+	 * Hide all elements initially
 	 */
-	openAll() {
-		Helpers.forEach(this.$accordionContents, (idx, item) => {
-			this.slideDown($(item));
+	render() {
+		let isItemExpanded;
+		let height;
+
+		// Add attributes describing the functionality of the accordion
+		this.$el.attr('aria-multiselectable', this.multiselectable);
+
+		// Set inital state of each tab
+		this.$triggerList.each((index, item) => {
+			isItemExpanded = this.itemStateList[index].isExpanded;
+
+			$(item).attr('aria-selected', isItemExpanded)
+				.attr('aria-expanded', isItemExpanded);
 		});
-		Helpers.forEach(this.$accordionBtns, (idx, item) => {
-			this.activateBtn($(item));
+
+		// Set initial state of each panel
+		this.$panelList.each((index, item) => {
+			isItemExpanded = this.itemStateList[index].isExpanded;
+			height = isItemExpanded ? this.panelHeightList[index] : 0;
+
+			$(item).attr('aria-hidden', !isItemExpanded)
+				.height(height);
+		});
+
+		this.initialized = true;
+	}
+
+
+	/**
+	 * Set all elements back to initial state
+	 */
+	destroy() {
+		this.$el.removeAttr('aria-multiselectable');
+
+		this.$triggerList.each(function() {
+			$(this).removeAttr('aria-selected')
+				.removeAttr('aria-expanded');
+		});
+
+		this.$panelList.each(function() {
+			$(this).removeAttr('aria-hidden')
+				.height('auto');
 		});
 	}
 }
 
-// Returns constructor
 export default Accordion;

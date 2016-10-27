@@ -1,24 +1,17 @@
 {
 	"simple": {
 		"accordionOptions": {
-			"contextClass": "default",
-			"classes": false
-		}
-	},
-	"custom": {
-		"accordionOptions": {
-			"contextClass": "custom",
-			"classes": "is-some-modifier",
+			"context": "default",
+			"cssClasses": false,
 			"jsOptions": [
 				{
-					"jsKey": "openIndex",
-					"jsValue": 0,
-					"jsObject": true
+					"key": "multiselectable",
+					"value": "true"
 				},
 				{
-					"jsKey": "singleOpen",
-					"jsValue": true,
-					"jsObject": true
+					"object": true,
+					"key": "items",
+					"value": "[{\"isExpanded\": false},{\"isExpanded\": true}]"
 				}
 			]
 		}

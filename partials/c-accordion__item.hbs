@@ -1,21 +1,21 @@
 {{! ---
- Accordion Item
- --- }}
+component: c-accordion__item
+============================================
 
-{{#unless options.noWrapper}}
-	<div class="accordion__item">
-{{/unless}}
-	<div class="accordion__header">
-		<a href="#{{options.accItemId}}" class="accordion__btn" data-js-atom="accordion-btn">
-			<span class="accordion__btn-inner">{{options.accButton}}</span>
-		</a>
-	</div>
+Requirements:
+- (only hbs)
 
-	<div class="accordion__content" id="{{options.accItemId}}" data-js-atom="accordion-content">
-		<div class="accordion__content-inner">
-			{{{yield}}}
-		</div>
-	</div>
-{{#unless options.noWrapper}}
-	</div>
-{{/unless}}
+Options:
+- headline {String} - The title of the item, used as "click button"
+- id {String} - A unique identifier
+- position {number} - A number describing the order of the item inside the accordion in the markup
+
+--- }}
+
+
+<h3 class="accordion__title" id="accordion-{{options.id}}-tab" aria-controls="{{options.id}}-panel" role="tab" tabindex="{{#isnt options.position 1}}-1{{else}}0{{/isnt}}" data-js-atom="trigger">{{options.headline}}
+</h3>
+
+<div class="accordion__content" id="{{options.id}}-panel" aria-labelledby="accordion-{{options.id}}-tab" role="tabpanel" data-js-atom="panel">
+	{{{yield}}}
+</div>
